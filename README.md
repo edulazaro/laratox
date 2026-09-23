@@ -166,6 +166,19 @@ php artisan vendor:publish --tag=laratox-config
 
 Calls go through Laravel's HTTP client, so `Http::fake()` and your logging see them. A 429 or 5xx is retried with the same idempotency key, so it is judged and billed once; a 402 is never retried.
 
+## Sponsors
+
+Laratox is supported by the following sponsors. Thank you for keeping it growing:
+
+<p>
+  <a href="https://kenodo.com"><img src="art/logo-kenodo.png" width="24" alt="Kenodo"></a>&nbsp;<a href="https://kenodo.com">Kenodo</a>&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://andorradev.com"><img src="art/logo-andorradev.png" width="24" alt="AndorraDev"></a>&nbsp;<a href="https://andorradev.com">AndorraDev</a>
+</p>
+
+## Author
+
+Created by [Edu Lazaro](https://edulazaro.com)
+
 ## License
 
-MIT. See [LICENSE](LICENSE).
+Laratox is open-sourced software licensed under the [MIT license](LICENSE).
