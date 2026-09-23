@@ -1,0 +1,55 @@
+{
+    "name": "edulazaro/laratox",
+    "description": "Content moderation for Laravel, powered by ToxicFilter",
+    "license": "MIT",
+    "type": "library",
+    "keywords": [
+        "laravel",
+        "moderation",
+        "content-moderation",
+        "spam",
+        "toxicity",
+        "validation",
+        "toxicfilter"
+    ],
+    "homepage": "https://toxicfilter.com/docs/sdks",
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^11.0|^12.0|^13.0",
+        "edulazaro/toxicfilter-sdk": "^1.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5|^11.0|^12.0",
+        "orchestra/testbench": "^9.0|^10.0|^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "EduLazaro\\Laratox\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "EduLazaro\\Laratox\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Edu Lazaro",
+            "email": "edu@edulazaro.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "EduLazaro\\Laratox\\LaratoxServiceProvider"
+            ],
+            "aliases": {
+                "ToxicFilter": "EduLazaro\\Laratox\\Facades\\ToxicFilter"
+            }
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "minimum-stability": "stable"
+}
