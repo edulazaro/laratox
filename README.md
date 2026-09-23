@@ -8,7 +8,7 @@ Every check returns one of three decisions (`allow`, `review`, `block`), the cat
 
 ## Installation
 
-Requires PHP 8.2+ and Laravel 11, 12 or 13.
+Requires PHP 8.2+ and Laravel 12 or 13.
 
 ```bash
 composer require edulazaro/laratox

@@ -15,12 +15,12 @@
     "homepage": "https://toxicfilter.com/docs/sdks",
     "require": {
         "php": "^8.2",
-        "laravel/framework": "^11.0|^12.0|^13.0",
+        "laravel/framework": "^12.61.1|^13.12",
         "edulazaro/toxicfilter-sdk": "^1.2"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.5|^11.0|^12.0",
-        "orchestra/testbench": "^9.0|^10.0|^11.0"
+        "orchestra/testbench": "^10.0|^11.0"
     },
     "autoload": {
         "psr-4": {
