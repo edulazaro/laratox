@@ -135,4 +135,20 @@ class FakeTest extends TestCase
         $this->assertTrue(\ToxicFilter::text('x')->check()->blocked());
         $this->assertTrue(app(\ToxicFilter\Client::class)->text('x')->blocked());
     }
+
+    /**
+     * More locales than the API accepts is refused, like the API does.
+     *
+     * @return void
+     */
+    public function test_too_many_locales_is_refused_like_the_api_does(): void
+    {
+        ToxicFilter::fake();
+
+        ToxicFilter::text('hola')->locale('es', 'en', 'pt', 'fr', 'it', 'de', 'nl', 'ca', 'pl', 'ru')->check();
+
+        $this->expectException(\ToxicFilter\Exception\InvalidRequest::class);
+
+        ToxicFilter::text('hola')->locale('es', 'en', 'pt', 'fr', 'it', 'de', 'nl', 'ca', 'pl', 'ru', 'tr')->check();
+    }
 }

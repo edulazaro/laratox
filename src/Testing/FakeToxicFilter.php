@@ -18,6 +18,9 @@ class FakeToxicFilter implements Transport
     /** Endpoints that answer with a verdict. */
     private const VERDICTS = ['text', 'email', 'name', 'signup', 'image', 'prompt', 'url', 'conversation'];
 
+    /** The most locales the API accepts on one call. */
+    private const MAX_LOCALES = 10;
+
     /** @var list<array{decision: string, category: string, reason: string, score: float, when: callable|null}> */
     private array $answers = [];
 
@@ -181,6 +184,10 @@ class FakeToxicFilter implements Transport
     {
         $endpoint = substr($request['path'], strlen('/api/v1/'));
 
+        if ($invalid = $this->invalid($request)) {
+            return [422, $invalid];
+        }
+
         return match (true) {
             in_array($endpoint, self::VERDICTS, true) => [200, $this->verdict($request) + ['credits' => $this->credits()]],
             $endpoint === 'batch' => [200, $this->batch($request)],
@@ -189,6 +196,28 @@ class FakeToxicFilter implements Transport
             $endpoint === 'usage' => [200, ['credits' => $this->credits() + ['allowance' => 2000]]],
             default => [404, ['error' => ['code' => 'not_found', 'message' => "The fake does not answer {$request['path']}."]]],
         };
+    }
+
+    /**
+     * The API's limits that a test can trip over, answered with its 422.
+     *
+     * Only what an integration gets wrong without noticing: a fake that accepts what the API
+     * refuses lets a test pass while every real call fails.
+     *
+     * @param array<string, mixed> $request
+     * @return array<string, mixed>|null
+     */
+    private function invalid(array $request): ?array
+    {
+        // A call, or a batch envelope. The API refuses a bad ITEM inside its answer, not
+        // with a 422 for the whole batch, and the fake does not model that.
+        if (count((array) ($request['body']['locales'] ?? [])) <= self::MAX_LOCALES) {
+            return null;
+        }
+
+        $message = 'The locales field must not have more than ' . self::MAX_LOCALES . ' items.';
+
+        return ['message' => $message, 'errors' => ['locales' => [$message]]];
     }
 
     /**

@@ -151,7 +151,7 @@ $fake->assertSent(fn ($request) => $request['path'] === '/api/v1/text');
 $fake->assertSentCount(1);
 ```
 
-The fake replaces only the network: the SDK's client and verdicts are the real ones.
+The fake replaces only the network: the SDK's client and verdicts are the real ones. Like the API, it refuses more than ten locales with an `InvalidRequest`.
 
 ## Configuration
 
