@@ -132,12 +132,21 @@ class Laratox
     /**
      * Anything else goes to the SDK unchanged: batch(), records(), usage(), ping()…
      *
+     * A batch is the one exception: it is filed under `laratox.project` like a check,
+     * unless its options name another.
+     *
      * @param string $method
      * @param array<int, mixed> $arguments
      * @return mixed
      */
     public function __call(string $method, array $arguments): mixed
     {
+        $project = config('laratox.project');
+
+        if (in_array($method, ['batch', 'batchAsync'], true) && is_string($project) && $project !== '') {
+            $arguments[1] = ['project' => $project] + (array) ($arguments[1] ?? []);
+        }
+
         return $this->client->{$method}(...$arguments);
     }
 

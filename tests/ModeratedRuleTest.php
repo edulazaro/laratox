@@ -262,4 +262,19 @@ class ModeratedRuleTest extends TestCase
         $this->assertTrue($rule->verdict('tags.1')->blocked());
         $this->assertTrue($rule->verdict()->blocked());
     }
+
+    /**
+     * The rule files under the configured project too.
+     *
+     * @return void
+     */
+    public function test_the_rule_uses_the_configured_project(): void
+    {
+        config(['laratox.project' => 'forum']);
+        $fake = \EduLazaro\Laratox\Facades\ToxicFilter::fake();
+
+        validator(['body' => 'hola'], ['body' => [\EduLazaro\Laratox\Rules\Moderated::text()]])->passes();
+
+        $this->assertSame('forum', $fake->sent()[0]['body']['project']);
+    }
 }

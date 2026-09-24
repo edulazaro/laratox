@@ -107,4 +107,39 @@ class PendingCheckTest extends TestCase
         $this->assertSame('test', ToxicFilter::ping()['mode']);
         $this->assertSame(2000, ToxicFilter::usage()['credits']['remaining']);
     }
+
+    /**
+     * TOXICFILTER_PROJECT files every check and batch there; ->project() overrides it.
+     *
+     * @return void
+     */
+    public function test_the_configured_project_reaches_checks_and_batches(): void
+    {
+        config(['laratox.project' => 'forum']);
+        $fake = ToxicFilter::fake();
+
+        ToxicFilter::text('hola')->check();
+        ToxicFilter::text('hola')->project('shop')->check();
+        ToxicFilter::batch([['kind' => 'text', 'content' => 'hola']]);
+
+        $sent = $fake->sent();
+
+        $this->assertSame('forum', $sent[0]['body']['project']);
+        $this->assertSame('shop', $sent[1]['body']['project']);
+        $this->assertSame('forum', $sent[2]['body']['project']);
+    }
+
+    /**
+     * Without one configured, nothing is sent and the API uses the default project.
+     *
+     * @return void
+     */
+    public function test_no_project_is_sent_unless_configured(): void
+    {
+        $fake = ToxicFilter::fake();
+
+        ToxicFilter::text('hola')->check();
+
+        $this->assertArrayNotHasKey('project', $fake->sent()[0]['body']);
+    }
 }

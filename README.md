@@ -48,6 +48,7 @@ Options chain before `check()`:
 ```php
 ToxicFilter::text($listing->description)
     ->policy('marketplace')     // one of your policies, instead of the default
+    ->project('shop')           // one of your projects, instead of TOXICFILTER_PROJECT
     ->locale('es')              // the language it should be in
     ->surface('listing')        // where it appears
     ->reference("listing_{$listing->id}")
@@ -55,6 +56,10 @@ ToxicFilter::text($listing->description)
 ```
 
 Also `->actor()`, `->withoutAi()`, `->rules([...])`, `->redact()` and `->option($key, $value)` for anything else.
+
+If your ToxicFilter organization moderates several sites, give each app its project once in
+`.env` (`TOXICFILTER_PROJECT=forum`): every check and every `ToxicFilter::batch()` is filed
+there, with its own activity, review queue and webhooks. `->project()` overrides it for one call.
 
 Every kind of content:
 
@@ -70,7 +75,7 @@ ToxicFilter::conversation($messages)->check();
 ToxicFilter::signup(['name' => $name, 'email' => $email, 'bio' => $bio])->check();
 ```
 
-The verdict is the [PHP SDK](https://github.com/toxicfilter/php-sdk)'s: `allowed()`, `needsReview()`, `blocked()`, `reason()` (the first one), `reasons()` (all of them), `scores()`, `flagged()`, `id()`… The rest of the API is there too: `ToxicFilter::batch()`, `records()`, `resolve()`, `feedback()`, `usage()`, `ping()`, and `ToxicFilter::client()` gives you the SDK client itself.
+The verdict is the [PHP SDK](https://github.com/toxicfilter/php-sdk)'s: `allowed()`, `needsReview()`, `blocked()`, `reason()` (the first one), `reasons()` (all of them), `scores()`, `flagged()`, `id()`, `project()`… The rest of the API is there too: `ToxicFilter::batch()`, `records()`, `resolve()`, `feedback()`, `usage()`, `ping()`, and `ToxicFilter::client()` gives you the SDK client itself.
 
 ## When the API cannot answer
 
@@ -157,6 +162,7 @@ php artisan vendor:publish --tag=laratox-config
 | Key | Env | Default |
 |---|---|---|
 | `key` | `TOXICFILTER_KEY` | |
+| `project` | `TOXICFILTER_PROJECT` | your organization's default project |
 | `url` | `TOXICFILTER_URL` | `https://toxicfilter.com` |
 | `timeout` | `TOXICFILTER_TIMEOUT` | `10` |
 | `connect_timeout` | `TOXICFILTER_CONNECT_TIMEOUT` | `5` |

@@ -5,6 +5,9 @@ return [
     // tf_live_… in production, tf_test_… while you integrate (never charged).
     'key' => env('TOXICFILTER_KEY'),
 
+    // The project checks are filed under. Empty means your organization's default one.
+    'project' => env('TOXICFILTER_PROJECT'),
+
     // Redirects are never followed, so use https.
     'url' => env('TOXICFILTER_URL', 'https://toxicfilter.com'),
 

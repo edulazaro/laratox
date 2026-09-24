@@ -40,6 +40,8 @@ class Moderated implements ValidationRule
         if (! in_array($kind, self::KINDS, true)) {
             throw new InvalidArgumentException("laratox: [{$kind}] is not one of: " . implode(', ', self::KINDS) . '.');
         }
+
+        $this->useDefaultProject();
     }
 
     /**

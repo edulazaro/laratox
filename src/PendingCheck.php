@@ -25,6 +25,7 @@ class PendingCheck
         private readonly string $kind,
         private readonly string|array $subject,
     ) {
+        $this->useDefaultProject();
     }
 
     /**

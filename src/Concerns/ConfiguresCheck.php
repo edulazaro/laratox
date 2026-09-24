@@ -22,6 +22,31 @@ trait ConfiguresCheck
     }
 
     /**
+     * File the verdict under one of your projects instead of `laratox.project`.
+     *
+     * @param string $slug
+     * @return static
+     */
+    public function project(string $slug): static
+    {
+        return $this->option('project', $slug);
+    }
+
+    /**
+     * Start from the configured project, if there is one.
+     *
+     * @return void
+     */
+    protected function useDefaultProject(): void
+    {
+        $project = config('laratox.project');
+
+        if (is_string($project) && $project !== '') {
+            $this->options['project'] = $project;
+        }
+    }
+
+    /**
      * The languages it should be written in.
      *
      * @param string ...$locales
