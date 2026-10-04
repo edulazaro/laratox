@@ -142,4 +142,26 @@ class PendingCheckTest extends TestCase
 
         $this->assertArrayNotHasKey('project', $fake->sent()[0]['body']);
     }
+
+    /**
+     * What the site does if it is refused travels with the check: one measure as a string,
+     * several as a list, and the rule chains it too.
+     *
+     * @return void
+     */
+    public function test_the_restriction_travels_with_the_check(): void
+    {
+        $fake = ToxicFilter::fake();
+
+        ToxicFilter::text('hola')->restriction('removal')->check();
+        ToxicFilter::text('hola')->restriction('removal', 'account_suspended')->check();
+
+        $sent = $fake->sent();
+
+        $this->assertSame('removal', $sent[0]['body']['restriction']);
+        $this->assertSame(['removal', 'account_suspended'], $sent[1]['body']['restriction']);
+
+        validator(['body' => 'hola'], ['body' => [\EduLazaro\Laratox\Rules\Moderated::text()->restriction('demoted')]])->passes();
+        $this->assertSame('demoted', $fake->sent()[2]['body']['restriction']);
+    }
 }

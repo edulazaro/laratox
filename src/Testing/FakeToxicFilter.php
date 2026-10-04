@@ -12,6 +12,7 @@ use ToxicFilter\Transport;
  *   $fake->shouldBlock('spam', 'Contains a link');
  *   $fake->shouldReview('toxicity', when: fn ($request) => ...);
  *   $fake->assertSentCount(1);
+ *   $fake->withStatements();                      // blocks carry a statement of reasons
  */
 class FakeToxicFilter implements Transport
 {
@@ -31,6 +32,20 @@ class FakeToxicFilter implements Transport
     private ?array $raw = null;
 
     private int $count = 0;
+
+    private bool $statements = false;
+
+    /**
+     * Blocks carry a statement of reasons, as on a project that writes them.
+     *
+     * @return static
+     */
+    public function withStatements(): static
+    {
+        $this->statements = true;
+
+        return $this;
+    }
 
     /**
      * Allow everything again.
@@ -194,6 +209,16 @@ class FakeToxicFilter implements Transport
             $endpoint === 'batches' => [200, ['batches' => []]],
             $endpoint === 'ping' => [200, ['ok' => true, 'version' => 'v1', 'mode' => 'test', 'time' => date(DATE_ATOM)]],
             $endpoint === 'usage' => [200, ['credits' => $this->credits() + ['allowance' => 2000]]],
+            $endpoint === 'statements/transparency' => [200, ['statements' => [], 'next' => null]],
+            (bool) preg_match('#^records/([^/]+)/statement$#', $endpoint, $m) => $this->statements
+                ? [200, ['id' => $m[1], 'statement' => $this->statement($m[1])]]
+                : [409, ['error' => ['code' => 'no_restriction', 'message' => 'This verdict restricts nothing, so it has no statement of reasons.']]],
+            (bool) preg_match('#^records/([^/]+)/appeal$#', $endpoint, $m) => [201, $this->record($m[1], ['state' => 'open', 'reason' => $request['body']['reason'] ?? null])],
+            (bool) preg_match('#^records/([^/]+)/appeal/resolve$#', $endpoint, $m) => [200, $this->record($m[1], [
+                'state' => $request['body']['outcome'] ?? 'upheld',
+                'resolved_by' => $request['body']['moderator'] ?? null,
+                'explanation' => $request['body']['explanation'] ?? null,
+            ]) + ['appeal_decision' => 'We have reviewed your appeal. ' . ($request['body']['explanation'] ?? '')]],
             default => [404, ['error' => ['code' => 'not_found', 'message' => "The fake does not answer {$request['path']}."]]],
         };
     }
@@ -252,7 +277,51 @@ class FakeToxicFilter implements Transport
             'policy' => ['slug' => 'default', 'version' => 0],
         ];
 
+        if ($this->statements && $verdict['decision'] === 'block') {
+            $verdict['statement'] = $this->statement($verdict['id']);
+        }
+
         return $this->raw === null ? $verdict : array_replace($verdict, $this->raw);
+    }
+
+    /**
+     * A statement of reasons in the API's shape.
+     *
+     * @param string $id
+     * @return array<string, mixed>
+     */
+    private function statement(string $id): array
+    {
+        return [
+            'restrictions' => ['removal'],
+            'territories' => [],
+            'duration' => null,
+            'facts' => ['flagged' => [], 'reasons' => ['Refused by the fake.'], 'source' => 'own_initiative'],
+            'automated' => ['detection' => true, 'decision' => true],
+            'ground' => ['type' => 'terms', 'policy' => null, 'clauses' => [], 'terms_url' => null],
+            'redress' => ['internal' => null, 'out_of_court' => true, 'judicial' => true],
+            'locale' => 'en',
+            'text' => "We have removed your content.\nReference: {$id}",
+        ];
+    }
+
+    /**
+     * A filed verdict with an appeal on it.
+     *
+     * @param string $id
+     * @param array<string, mixed> $appeal
+     * @return array<string, mixed>
+     */
+    private function record(string $id, array $appeal): array
+    {
+        return [
+            'id' => $id,
+            'decision' => 'block',
+            'flagged' => [],
+            'scores' => [],
+            'signals' => [],
+            'appeal' => $appeal + ['filed_at' => date(DATE_ATOM)],
+        ];
     }
 
     /**

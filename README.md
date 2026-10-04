@@ -55,7 +55,7 @@ ToxicFilter::text($listing->description)
     ->check();
 ```
 
-Also `->actor()`, `->withoutAi()`, `->rules([...])`, `->redact()` and `->option($key, $value)` for anything else.
+Also `->actor()`, `->withoutAi()`, `->rules([...])`, `->redact()`, `->restriction('removal', 'account_suspended')` (what your site does if it is refused, for the statement of reasons) and `->option($key, $value)` for anything else.
 
 If your ToxicFilter organization moderates several sites, give each app its project once in
 `.env` (`TOXICFILTER_PROJECT=forum`): every check and every `ToxicFilter::batch()` is filed
@@ -138,6 +138,34 @@ With a wildcard (`'tags.*' => [$rule]`), ask for each field: `$rule->verdict('ta
 If the API cannot answer, `laratox.rule.on_error` decides: `allow` (default) lets the field
 through and logs a warning, `refuse` fails it.
 
+## Statements of reasons and appeals
+
+On a project that writes statements of reasons (switched on in the ToxicFilter panel), a
+block carries the statement article 17 of the Digital Services Act asks you to give the
+author, ready to send:
+
+```php
+$verdict = ToxicFilter::text($comment->body)->check();
+
+if ($verdict->blocked() && $verdict->statementText()) {
+    $comment->author->notify(new ContentRemoved($verdict->statementText()));
+}
+```
+
+Everything else goes straight to the SDK:
+
+```php
+ToxicFilter::statement($id, 'es');                          // the same statement, later
+ToxicFilter::appeal($id, 'It was a recipe.');               // the author contests it
+ToxicFilter::resolveAppeal($id, 'reversed', 'ana', 'A recipe after all.');
+ToxicFilter::transparency('2026-10-01', '2026-10-31');      // for the Commission's database
+```
+
+A person decides an appeal (`upheld` or `reversed`), with reasons; the answer's
+`appealDecision()` is the reasoned decision to send back, and the `appeal.resolved` webhook
+tells your site. This helps with what articles 17, 20 and 24(5) ask for; it is not legal
+advice.
+
 ## Testing
 
 ```php
@@ -150,6 +178,9 @@ $fake->shouldReview('toxicity', when: fn ($request) =>        // or only some re
 $fake->assertSent(fn ($request) => $request['path'] === '/api/v1/text');
 $fake->assertSentCount(1);
 ```
+
+`$fake->withStatements()` makes blocks carry a statement, and the fake answers the
+statement, appeal and transparency endpoints.
 
 The fake replaces only the network: the SDK's client and verdicts are the real ones. Like the API, it refuses more than ten locales with an `InvalidRequest`.
 

@@ -133,6 +133,18 @@ trait ConfiguresCheck
     }
 
     /**
+     * What your site does with the content if it is refused, for the statement of
+     * reasons: `removal`, `disabled`, `demoted` or `visibility`, plus `account_suspended`.
+     *
+     * @param string ...$measures
+     * @return static
+     */
+    public function restriction(string ...$measures): static
+    {
+        return $this->option('restriction', count($measures) === 1 ? $measures[0] : $measures);
+    }
+
+    /**
      * Any other field the endpoint accepts.
      *
      * @param string $key

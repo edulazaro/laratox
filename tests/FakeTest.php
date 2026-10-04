@@ -151,4 +151,39 @@ class FakeTest extends TestCase
 
         ToxicFilter::text('hola')->locale('es', 'en', 'pt', 'fr', 'it', 'de', 'nl', 'ca', 'pl', 'ru', 'tr')->check();
     }
+
+    /**
+     * @return void
+     */
+    public function test_blocks_carry_a_statement_and_appeals_are_answered(): void
+    {
+        $fake = ToxicFilter::fake()->withStatements()->shouldBlock('spam', 'Contains a link');
+
+        $verdict = ToxicFilter::text('buy now')->check();
+
+        $this->assertSame('removal', $verdict->statement()['restrictions'][0]);
+        $this->assertStringContainsString('We have removed your content.', $verdict->statementText());
+        $this->assertSame('removal', ToxicFilter::statement($verdict->id())['restrictions'][0]);
+
+        $this->assertSame('open', ToxicFilter::appeal($verdict->id(), 'Not spam.')->appeal()['state']);
+
+        $decided = ToxicFilter::resolveAppeal($verdict->id(), 'reversed', 'ana', 'A recipe.');
+        $this->assertSame('reversed', $decided->appeal()['state']);
+        $this->assertStringContainsString('A recipe.', $decided->appealDecision());
+
+        $this->assertSame([], ToxicFilter::transparency('2026-10-01')['statements']);
+        $fake->assertSent(fn ($request) => $request['path'] === '/api/v1/records/' . $verdict->id() . '/appeal/resolve');
+    }
+
+    /**
+     * @return void
+     */
+    public function test_without_statements_there_is_none(): void
+    {
+        ToxicFilter::fake()->shouldBlock();
+
+        $verdict = ToxicFilter::text('buy now')->check();
+
+        $this->assertNull($verdict->statement());
+    }
 }
