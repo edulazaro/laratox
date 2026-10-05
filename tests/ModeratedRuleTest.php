@@ -219,13 +219,13 @@ class ModeratedRuleTest extends TestCase
     {
         $fake = ToxicFilter::fake();
 
-        $this->validate('hola', Moderated::text()->policy('comments')->locale('es')->withoutAi())->passes();
+        $this->validate('hola', Moderated::text()->policy('comments')->locale('es')->effort('low'))->passes();
 
         $fake->assertSent(fn (array $request) => $request['body'] === [
             'content' => 'hola',
             'policy' => 'comments',
             'locales' => ['es'],
-            'ai' => false,
+            'effort' => 'low',
         ]);
     }
 

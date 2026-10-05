@@ -40,7 +40,7 @@ class PendingCheckTest extends TestCase
             ->surface('comment')
             ->reference('comment_7')
             ->actor('user_3')
-            ->withoutAi()
+            ->effort('low')
             ->redact()
             ->option('custom', 'x')
             ->check();
@@ -52,7 +52,7 @@ class PendingCheckTest extends TestCase
             'surface' => 'comment',
             'reference' => 'comment_7',
             'actor' => 'user_3',
-            'ai' => false,
+            'effort' => 'low',
             'redact' => true,
             'custom' => 'x',
         ]);

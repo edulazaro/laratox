@@ -257,6 +257,8 @@ class FakeToxicFilter implements Transport
         $fields = $item ?? (array) ($request['body'] ?? []);
         $answer = $this->pick(['body' => $fields] + $request);
 
+        $effort = is_string($fields['effort'] ?? null) ? $fields['effort'] : 'low';
+
         $verdict = [
             'id' => 'mod_fake' . str_pad((string) ++$this->count, 6, '0', STR_PAD_LEFT),
             'reference' => $fields['reference'] ?? null,
@@ -270,7 +272,8 @@ class FakeToxicFilter implements Transport
                 'reason' => $answer['reason'],
                 'evidence' => [],
             ]] : [],
-            'used_ai' => false,
+            'effort' => $effort,
+            'model' => $effort === 'low' ? ['read' => false] : ['read' => false, 'why' => 'settled'],
             'took_ms' => 0,
             'cached' => false,
             'charged' => 0,

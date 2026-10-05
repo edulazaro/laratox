@@ -55,7 +55,7 @@ ToxicFilter::text($listing->description)
     ->check();
 ```
 
-Also `->actor()`, `->withoutAi()`, `->rules([...])`, `->redact()`, `->restriction('removal', 'account_suspended')` (what your site does if it is refused, for the statement of reasons) and `->option($key, $value)` for anything else.
+Also `->actor()`, `->effort('low')` (`low`, `medium` or `high`: how far the check may go), `->rules([...])`, `->redact()`, `->restriction('removal', 'account_suspended')` (what your site does if it is refused, for the statement of reasons) and `->option($key, $value)` for anything else.
 
 If your ToxicFilter organization moderates several sites, give each app its project once in
 `.env` (`TOXICFILTER_PROJECT=forum`): every check and every `ToxicFilter::batch()` is filed

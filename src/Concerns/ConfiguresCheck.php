@@ -91,24 +91,14 @@ trait ConfiguresCheck
     }
 
     /**
-     * Let the model read it, or not.
+     * How far the check may go: `low` (instant checks only, one credit), `medium` or `high`.
      *
-     * @param bool $use
+     * @param string $effort
      * @return static
      */
-    public function ai(bool $use = true): static
+    public function effort(string $effort): static
     {
-        return $this->option('ai', $use);
-    }
-
-    /**
-     * Instant checks only: one credit.
-     *
-     * @return static
-     */
-    public function withoutAi(): static
-    {
-        return $this->ai(false);
+        return $this->option('effort', $effort);
     }
 
     /**

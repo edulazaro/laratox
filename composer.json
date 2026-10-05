@@ -16,7 +16,7 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.61.1|^13.12",
-        "edulazaro/toxicfilter-sdk": "^1.5"
+        "edulazaro/toxicfilter-sdk": "^1.6"
     },
     "require-dev": {
         "phpunit/phpunit": "^11.5|^12.0",
